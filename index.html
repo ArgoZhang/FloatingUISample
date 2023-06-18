@@ -1,39 +1,110 @@
 <!DOCTYPE html>
 <html>
 
-<head lang='zh'>
-	<meta charset='utf-8'>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta name="renderer" content="webkit" />
-	<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=0" />
-	<title>Luckysheet</title>
+<head>
+  <title>Floating UI Tutorial</title>
+  <style>
+    #tooltip {
+      display: none;
+      width: max-content;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #222;
+      color: white;
+      font-weight: bold;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 90%;
+    }
 
-	<link rel='stylesheet' href='./plugins/css/pluginsCss.css' />
-	<link rel='stylesheet' href='./plugins/plugins.css' />
-	<link rel='stylesheet' href='./css/luckysheet.css' />
-	<link rel='stylesheet' href='./assets/iconfont/iconfont.css' />
-	<script src="./plugins/js/plugin.js"></script>
-
-	<!-- rollup luckysheet.js -->
-	<script src="./luckysheet.umd.js"></script>
-	<script src="./demoData/testData.js"></script>
-
+    #arrow {
+      position: absolute;
+      background: #222;
+      width: 8px;
+      height: 8px;
+      transform: rotate(45deg);
+    }
+  </style>
 </head>
 
 <body>
-	<div id="luckysheet" style="margin:0px;padding:0px;position:absolute;width:100%;height:100%;left: 0px;top: 0px;"></div>
-	<script type="module">
-		import init from './luckysheet_init.js'
-		let option = {
-			saveCallback(saveData){
-				console.log(saveData,'saveData');
-			},
-			closeCallback(){
-				console.log('close click');
-			}
-		}
-		init(testData,option)
-	</script>
+  <button id="button" aria-describedby="tooltip">
+    My button
+  </button>
+
+  <div id="tooltip" role="tooltip">
+    My tooltip
+    <div id="arrow"></div>
+  </div>
+
+  <script type="module">
+    // Your code will go here.
+    import {
+      computePosition,
+      flip,
+      shift,
+      offset,
+      arrow
+    } from './js/floating-ui.dom.esm.js'
+
+    const button = document.querySelector('#button');
+    const tooltip = document.querySelector('#tooltip');
+    const arrowElement = document.querySelector('#arrow');
+
+    function showTooltip() {
+      tooltip.style.display = 'block';
+      update();
+    }
+
+    function hideTooltip() {
+      tooltip.style.display = '';
+    }
+
+    [
+      ['mouseenter', showTooltip],
+      ['mouseleave', hideTooltip],
+      ['focus', showTooltip],
+      ['blur', hideTooltip],
+    ].forEach(([event, listener]) => {
+      button.addEventListener(event, listener);
+    });
+
+    function update() {
+      computePosition(button, tooltip, {
+        placement: 'top',
+        middleware: [
+          offset(6),
+          flip(),
+          shift({ padding: 5 }),
+          arrow({ element: arrowElement }),
+        ],
+      }).then(({ x, y, placement, middlewareData }) => {
+        Object.assign(tooltip.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+
+        // Accessing the data
+        const { x: arrowX, y: arrowY } = middlewareData.arrow;
+
+        const staticSide = {
+          top: 'bottom',
+          right: 'left',
+          bottom: 'top',
+          left: 'right',
+        }[placement.split('-')[0]];
+
+        Object.assign(arrowElement.style, {
+          left: arrowX != null ? `${arrowX}px` : '',
+          top: arrowY != null ? `${arrowY}px` : '',
+          right: '',
+          bottom: '',
+          [staticSide]: '-4px',
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>
