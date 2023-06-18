@@ -4,6 +4,10 @@
 <head>
   <title>Floating UI Tutorial</title>
   <style>
+    #button {
+      margin: 10rem;
+    }
+    
     #tooltip {
       display: none;
       width: max-content;
@@ -29,15 +33,19 @@
 </head>
 
 <body>
-  <button id="button" aria-describedby="tooltip">
-    My button
-  </button>
 
-  <div id="tooltip" role="tooltip">
-    My tooltip
-    <div id="arrow"></div>
+  <div style="height: 400px; border: 1px solid #ddd; overflow: auto;">
+    <div style="height: 1200px;">
+      <button id="button" aria-describedby="tooltip">
+        My button
+      </button>
+
+      <div id="tooltip" role="tooltip">
+        My tooltip
+        <div id="arrow"></div>
+      </div>
+    </div>
   </div>
-
   <script type="module">
     // Your code will go here.
     import {
@@ -45,7 +53,8 @@
       flip,
       shift,
       offset,
-      arrow
+      arrow,
+      autoUpdate
     } from './js/floating-ui.dom.esm.js'
 
     const button = document.querySelector('#button');
@@ -104,6 +113,12 @@
         });
       });
     }
+
+    autoUpdate(
+      button,
+      tooltip,
+      update
+    )
   </script>
 </body>
 
